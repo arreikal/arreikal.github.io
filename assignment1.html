@@ -12,13 +12,143 @@
     <body> 
 
         <div class="header">
-            <h1>Example Student's Assignment 1!</h1>
-            <p>
-            <img src="red-panda.jpg" width=400></a>
+            <h1>A1: Blink!</h1>
+
+            <h3>Kierra Long</h3>
+            <h2 class="assigns">Schematic</h2>
+                
+                <img src="A1-S.png" width=400>
+                <p class="white">This is my schematic of the circuit. It is made of 4 LEDs (from left to right: Blue, Green, Yellow, Red)
+                    and a corresponding resistor before each one. The Pins from the arduino are 5V when on high, so I used Ohms law to calculate
+                    the resistor current for each LED. The calculations are as follow: <br><br>
+                    For Blue LED: <br>(5V-3.3V)=(0.02A)(X)<br>(1.7V)=(0.02A)(X)<br>X=85 Ohms  <br>Round up to 100 Ohm resistor.<br><br>
+                    For Green, Yellow, Red LEDs: <br>(5V-1.8V)=(0.02A)(X)<br>(3.2V)=(0.02A)(X)<br>X=160 Ohms  <br>Round up to 220 Ohm resistor.<br><br>
+                    After passing through the LEDs, all wires connect back to Ground. <br><br>
+                    Created with https://www.circuit-diagram.org/
+                </p>
+
+            <h2 class="assigns">Circuit</h2>
+                <img src="A1-C.jpg" height=400>
+                <p class="white">This is the circuit based off of the previous schematic, made using a breadboard and Arduino.</p>
+            <h2 class="assigns">Code</h2>
+                <div class="code">
+                    <p class="code">// constants won't change. They're used here to set pin numbers: <br>
+                        const int blue = 2;     // set pin for the blue LED<br>
+                        const int green = 3;     // set pin for the green LED<br>
+                        const int yellow = 4;     // set pin for the yellow LED <br>
+                        const int red = 5;     // set pin for the red LED
+                        <br>
+                        // the setup function runs once when you press reset or power the board<br>
+                        void setup() {<br>
+                          // initialize digital pin LED_BUILTIN as an output.<br>
+                          for (int x=2; x<6; x++) {<br>
+                            pinMode(x, OUTPUT);<br>
+                          }<br>
+                          <br>
+                        }<br>
+                        
+                        // the loop function runs over and over again forever<br>
+                        void loop() {<br>
+                            <br>
+                          int y[] = {blue, green, yellow, red}; // array of the pins<br>
+                          <br>
+                        // Drummroll<br>
+                        <br>
+                          // countdown<br>
+                          <br>
+                          for (int x=0; x<3; x++) {<br>
+                          digitalWrite(red, HIGH);   // turn the red LED on<br>
+                          delay(300); // dramatic pause<br>
+                          digitalWrite(red, LOW);    // turn the red LED off<br>
+                          delay(300); // dramatic pause<br>
+                          }<br>
+                        
+                          <br>
+                          digitalWrite(blue, HIGH);   // turn the blue LED on<br>
+                          delay(100); // dramatic pause<br>
+                          digitalWrite(blue, LOW);    // turn the blue LED off<br>
+                          delay(200); // dramatic pause<br>
+                          digitalWrite(yellow, HIGH);   // turn the yellow LED on<br>
+                          delay(100); // dramatic pause<br>
+                          digitalWrite(yellow, LOW);    // turn the yellow LED off<br>
+                          digitalWrite(green, HIGH);   // turn the green LED on<br>
+                          delay(100); // dramatic pause<br>
+                          digitalWrite(green, LOW);    // turn the green LED off<br>
+                          delay(200); // dramatic pause<br>
+                          digitalWrite(red, HIGH);   // turn the red LED on<br>
+                          delay(100); // dramatic pause<br>
+                          digitalWrite(red, LOW);    // turn the red LED off<br>
+                          digitalWrite(yellow, HIGH);   // turn the yellow LED on<br>
+                          delay(100); // dramatic pause<br>
+                          digitalWrite(yellow, LOW);    // turn the yellow LED off<br>
+                          
+                          <br>
+                        // Flash all lights<br>
+                        <br>
+                          for (int x=0; x<4; x++) {<br>
+                            int pin = y[x];<br>
+                            digitalWrite(pin, HIGH);   // turn the LED on (HIGH is the voltage level) <br>
+                          }<br>
+                          delay(200); // dramatic pause<br>
+                          for (int x=0; x<4; x++) {<br>
+                            int pin = y[x];<br>
+                            digitalWrite(pin, LOW);   // turn the LED off (LOW is the voltage level) <br>
+                          }<br>
+                          delay(300); // dramatic pause<br>
+                          <br>
+                        // Tune<br>
+                          int len = 900;<br>
+                          digitalWrite(yellow, HIGH);   // turn the yellow LED on<br>
+                          delay(797); // dramatic pause<br>
+                          digitalWrite(yellow, LOW);    // turn the yellow LED off<br>
+                          digitalWrite(green, HIGH);   // turn the green LED on<br>
+                          delay(797); // dramatic pause<br>
+                          digitalWrite(green, LOW);    // turn the green LED off<br>
+                          digitalWrite(red, HIGH);   // turn the red LED on<br>
+                          delay(531); // dramatic pause<br>
+                          digitalWrite(red, LOW);    // turn the red LED off<br>
+                          digitalWrite(green, HIGH);   // turn the green LED on<br>
+                          delay(797); // dramatic pause<br>
+                          digitalWrite(green, LOW);    // turn the green LED off<br>
+                          digitalWrite(blue, HIGH);   // turn the blue LED on<br>
+                          delay(797); // dramatic pause<br>
+                          digitalWrite(blue, LOW);    // turn the blue LED off<br>
+                          <br>
+                          
+                          digitalWrite(blue, HIGH);   // turn the blue LED on<br>
+                          delay(100); // dramatic pause<br>
+                          digitalWrite(blue, LOW);    // turn the blue LED off<br>
+                          digitalWrite(green, HIGH);   // turn the green LED on<br>
+                          delay(100); // dramatic pause<br>
+                          digitalWrite(green, LOW);    // turn the green LED off<br>
+                          digitalWrite(yellow, HIGH);   // turn the yellow LED on<br>
+                          delay(100); // dramatic pause<br>
+                          digitalWrite(yellow, LOW);    // turn the yellow LED off<br>
+                          digitalWrite(red, HIGH);   // turn the red LED on<br>
+                          delay(797); // dramatic pause<br>
+                          digitalWrite(red, LOW);    // turn the red LED off<br>
+                          delay(100); // dramatic pause<br>
+                          
+                          digitalWrite(yellow, HIGH);   // turn the yellow LED on<br>
+                          delay(len); // dramatic pause<br>
+                          digitalWrite(yellow, LOW);    // turn the yellow LED off<br>
+                        
+                          </p>
+                </div>
+            <h2 class="assigns">Operation</h2>
+            <img src="A1.gif" height="400">
+            <p class="white">This is a Gif of the operation of the blinking lights. The whole process takes about 8 seconds to repeat.</p>
+            <h2 class="assigns">*BONUS* Music Video</h2>
+            <iframe width="840" height="473" src="https://www.youtube.com/embed/KVBc44lsPWk" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <!-- https://youtu.be/KVBc44lsPWk -->
+            <p class="white">I hope you enjoyed this surprise music video. To make the lights match up, it was alot of trial and error and running the code 
+                over and over again. I also looked up sheet music to calculate the length of the notes in ms by converting the BPM of the song to the length of 
+                quarter notes. This took a bit to get timed right, but after I thought I had got the first few seconds worked out, and finally was able to start the song and the operation of the lights at the same time,
+                I was shocked to see that it repeated exactly in time with the rest of the intro as well! This would have been even betterr if I matched up the lights
+                with the rest of the song, but obviously this was a very time-intensive process, so I stopped after the intro. Hope this was a surprise!
+                <br><br>Song Credits: <br>Never Gonna Give You Up<br>Rick Astley
             </p>
-            <p>
-            Here is all the documentation for assignment 1!
-            </p>
+            
         </div>
         
     </body>

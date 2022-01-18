@@ -188,3 +188,14 @@ a {
   text-decoration: none;
 }
 
+.code {
+  background: rgb(255, 255, 255);
+  color: rgb(47, 47, 47);
+  font-family: 'Courier New', monospace;
+  padding: 30px;
+}
+
+.white {
+  color: #ffffff;
+}
+
