@@ -4,21 +4,191 @@
         <meta charset="utf-8"> 
         <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
 
-        <title>Example Student's HCDE 439 Physical Computing Page!</title> 
-
+        <title>Kierra Long's HCDE 439 Physical Computing Page!</title> 
+        <link rel="icon" type="image/png" href="favicon6.png">
+        <!-- Favicon from: https://adversurge.com/ -->
         <link href="style.css" media="screen" rel="stylesheet" type="text/css" />
 
     </head> 
     <body> 
 
         <div class="header">
-            <h1>Example Student's Assignment 2!</h1>
-            <p>
-            <img src="red-panda.jpg" width=400></a>
+            <h1>A2: Fade!</h1>
+            <!-- <a float="right" href="index.html"><img float="right" src="favicon5.png"height="50"></a><a float="right" href="index.html">Home</a> -->
+
+            <h3>Kierra Long</h3>
+            <h2 class="assigns">Schematic</h2>
+                
+                <img src="A2-S.png" height=400>
+                <p class="white">This is my schematic of the circuit. It connects a PushButton loop, as well as 4 LEDs (2 RGB LEDs and 2 regular LEDs) to the Arduino.
+                    The PushButton is connected to 5V Power and ground from one side, and Pin 2 from the other, to sense when the button is pressed.
+                    The RGB LEDs are connected to 3 different pins each (with corresponding resistors for color value) and ground. 
+                    The Blue and Yellow LEDs are connected to pin 7 and 8 with 100 and 220 Ohm resistors, respectively, and ground.
+                    The Pins from the arduino are 5V when on high, so I used Ohms law to calculate
+                    the resistor current for each LED. The calculations are as follow: <br><br>
+                    For Blue LEDs: <br>(5V-3.3V)=(0.02A)(X)<br>(1.7V)=(0.02A)(X)<br>X=85 Ohms  <br>Round up to 100 Ohm resistor.<br><br>
+                    For Green, Yellow, Red LEDs: <br>(5V-1.8V)=(0.02A)(X)<br>(3.2V)=(0.02A)(X)<br>X=160 Ohms  <br>Round up to 220 Ohm resistor.<br><br>
+                    After passing through the LEDs, all wires connect back to Ground. <br><br>
+                    The 10K resistor from the PushButton loop was chosen to provide an ample amount of resistence to keep the current quite small.<br><br>
+                    Created with https://www.circuit-diagram.org/ & Canva
+                </p>
+
+            <h2 class="assigns">Circuit</h2>
+                <img src="A2-C.jpg" height=400>
+                <p class="white">This is the circuit based off of the previous schematic, made using a breadboard and Arduino.</p>
+            <h2 class="assigns">Code</h2>
+                <div class="code">
+                    <p class="code">
+                        // constants to set pin numbers:<br>
+const int buttonPin = 2; // the number of the pushbutton pin<br>
+const int B = 3; // the number of the blue part of LED 1<br>
+const int G = 5; // the number of the green part of LED 1<br>
+const int R = 6; // the number of the red part of LED 1<br>
+const int Blu = 7; // the number of the blue LED<br>
+const int BB = 9; // the number of the blue part of LED 2<br>
+const int GG = 10; // the number of the green part of LED 2 <br>
+const int RR = 11; // the number of the red part of LED 2 <br>
+const int Y = 8; // the number of the yellow LED<br>
+int buttonState = 0; // variable for reading the pushbutton status<br>
+const int buttonPress = 0; // variable to keep track of clicks<br>
+<br>
+void setup() {<br>
+ // put your setup code here, to run once:<br>
+ int y[] = {B, G, R, Blu, BB, GG, RR, Y}; // array of the pins<br>
+ for (int x=0; x<8; x++) { //for loop through whole array<br>
+ int pin = y[x]; //pull out pin number<br>
+ pinMode(pin, OUTPUT); // initialize the LED pin as an output<br>
+ }<br>
+ pinMode(buttonPin, INPUT); // initialize the pushbutton pin as an input<br>
+<br>
+}<br>
+<br>
+void loop() {<br>
+ // put your main code here, to run repeatedly:<br>
+ buttonState = digitalRead(buttonPin); // read the state of the pushbutton value<br>
+ <br>
+<br>
+ <br>
+ if (buttonState == HIGH) { // check if the pushbutton is pressed. If it is, the buttonState is HIGH<br>
+ // Cool-Toned Colors<br>
+<br>
+ digitalWrite(Y, LOW); // turn LED off<br>
+<br>
+ // Fade to blues<br>
+<br>
+ // LED 1<br>
+ for(int i = 240; i > 80;i--){ // differences in red values<br>
+ analogWrite(R, i); // adjust red value<br>
+ delay(2); //wait<br>
+ }<br>
+ <br>
+ for(int i = 60; i < 170;i++){ // differences in green values<br>
+ analogWrite(G, i); // adjust green value<br>
+ delay(2); // wait<br>
+ } <br>
+ <br>
+ for(int i = 4; i < 250;i++){ // differences in blue values<br>
+ analogWrite(B, i); // adjust blue value<br>
+ delay(2); // wait<br>
+ } <br>
+<br>
+<br>
+ // LED 2<br>
+ for(int i = 210; i > 40;i--){ // differences in red values<br>
+ analogWrite(RR, i); // adjust red value<br>
+ delay(2); //wait<br>
+ }<br>
+ <br>
+ for(int i = 100; i < 130;i++){ // differences in green values<br>
+ analogWrite(GG, i); // adjust green value<br>
+ delay(2); // wait<br>
+ } <br>
+ <br>
+ for(int i = 5; i < 250;i++){ // differences in blue values<br>
+ analogWrite(BB, i); // adjust blue value<br>
+ delay(2); // wait<br>
+ } <br>
+ digitalWrite(Blu, HIGH); // turn LED on<br>
+ <br>
+ delay (1500); //wait<br>
+ <br>
+ //Variable LED 1<br>
+ analogWrite(R, 80); // set red value<br>
+ analogWrite(G, 170); // set green value<br>
+ analogWrite(B, 250); // set blue value<br>
+<br>
+ //Variable LED 2<br>
+ analogWrite(RR, 40); // set red value<br>
+ analogWrite(GG, 130); // set green value<br>
+ analogWrite(BB, 250); // set blue value<br>
+<br>
+<br>
+ } else {<br>
+ // Warm-Toned Colors<br>
+ digitalWrite(Blu, LOW); // turn LED off<br>
+<br>
+// Fade to Yellows
+<br>
+<br>
+ // LED 2<br>
+ for(int i = 40; i < 210;i++){ // differences in red values<br>
+ analogWrite(RR, i); // adjust red value<br>
+ delay(2); //wait<br>
+ }<br>
+ <br>
+ for(int i = 130; i > 100;i--){ // differences in green values<br>
+ analogWrite(GG, i); // adjust green value<br>
+ delay(2); // wait<br>
+ } <br>
+ <br>
+ for(int i = 250; i > 5;i--){ // differences in blue values<br>
+ analogWrite(BB, i); // adjust blue value<br>
+ delay(2); // wait<br>
+ } <br>
+<br>
+<br>
+ // LED 1<br>
+ for(int i = 80; i < 240;i++){ // differences in red values<br>
+ analogWrite(R, i); // adjust red value<br>
+ delay(2); //wait<br>
+ }<br>
+ <br>
+ for(int i = 170; i > 60;i--){ // differences in green values<br>
+ analogWrite(G, i); // adjust green value<br>
+ delay(2); // wait<br>
+ } <br>
+ <br>
+ for(int i = 250; i > 4;i--){ // differences in blue values<br>
+ analogWrite(B, i); // adjust blue value<br>
+ delay(2); // wait<br>
+ } <br>
+<br>
+ digitalWrite(Y, HIGH); // turn LED on<br>
+ <br>
+ delay (1500); // wait<br>
+ }<br>
+}<br>
+<br>
+
+                    </p>
+                </div>
+            <h2 class="assigns">Operation</h2>
+            <img src="A2.gif" height="400">
+            <p class="white">
+                This is a Gif of the operation of the fading lights. The goal of my circuit was to start off with Warm-Toned colors, then when the button is pushed/held, 
+                the warm colors will fade into cool colors. This happens by the yellow light turning off, and the light yellow middle lights
+                fading into blue, before the blue light on the end turns on. The reverse happens when the button is released,
+                and the blue lights fade into yellow, before the yellow light on the end turns on. <br><br>
+                However, I did have some challenges with this. The Gif shows what I wanted the transition to look like, only because I timed the button 
+                presses right, so that the lights transition to the opposite color before their if-statement repeats. 
+                What happens when I don't time it right, is that the warm-toned loop will repeat itself, and start fading the LEDs from colors
+                that it wasn't actually at, which makes them slightly jump to different colors. This isn't awful, but I wanted to find a way
+                for the warm colors to stay still, unless the button is held down- in which they seamlessly transition to cool colors and stay on, 
+                and when the button is released, they seamlessly transition back again. But, I didn't figure out a way to do this.
+
             </p>
-            <p>
-            Here is all the documentation for assignment 2!
-            </p>
+            
+            
         </div>
         
     </body>
