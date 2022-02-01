@@ -1,0 +1,224 @@
+<!DOCTYPE html> 
+<html> 
+    <head> 
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+
+        <title>Kierra Long's HCDE 439 Physical Computing Page!</title> 
+        <link rel="icon" type="image/png" href="favicon6.png">
+        <!-- Favicon from: https://adversurge.com/ -->
+        <link href="style.css" media="screen" rel="stylesheet" type="text/css" />
+
+    </head> 
+    <body> 
+
+        <div class="header">
+            <h1>A3: Input Output!</h1>
+            <!-- <a float="right" href="index.html"><img float="right" src="favicon5.png"height="50"></a><a float="right" href="index.html">Home</a> -->
+
+            <h3>Kierra Long</h3>
+            <h2 class="assigns">Schematic</h2>
+                
+                <img src="A3-S.png" height=400>
+                <p class="white">This is my schematic of the circuit. It has 4 main components: A pushbutton, two photoresistors, and one RGB LED. 
+                    The photoresistors are connected through a voltage divider to be able to measure the voltage through pins A0 and A1.
+                    The PushButton is connected to 5V Power and ground from one side, and Pin 2 from the other, to sense when the button is pressed.
+                    The RGB LEDs are connected to pins 9, 10, 11, (with corresponding resistors for color value) and ground. 
+                    The Pins from the arduino are 5V when on high, so I used Ohms law to calculate
+                    the resistor current for each LED. The calculations are as follow: <br><br>
+                    For Blue LEDs: <br>(5V-3.3V)=(0.02A)(X)<br>(1.7V)=(0.02A)(X)<br>X=85 Ohms  <br>Round up to 100 Ohm resistor.<br><br>
+                    For Green, Yellow, Red LEDs: <br>(5V-1.8V)=(0.02A)(X)<br>(3.2V)=(0.02A)(X)<br>X=160 Ohms  <br>Round up to 220 Ohm resistor.<br><br>
+                    After passing through the LEDs, all wires connect back to Ground. <br><br>
+                    The 10K resistor for the PushButton and photoresistors was chosen to provide an ample amount of resistence to keep the current quite small.<br><br>
+                    
+                    Created with https://www.circuit-diagram.org/ & Canva
+
+                    <br><br> Using the multimeter, the resistances I measured for the photoresistor were 55K Ohm and 135K Ohm. Below is a photo solving for the expected voltage output of V out.
+                </p>
+                <img src="A3-W.jpg" height=400>
+
+            <h2 class="assigns">Circuit</h2>
+                <img src="A3-C.jpg" height=400>
+                <p class="white">This is the circuit based off of the previous schematic, made using a breadboard and Arduino.</p>
+            <h2 class="assigns">Code</h2>
+                <div class="code">
+                    <p class="code">
+                        //Sources:<br>
+                        // Calibration: Arduino Example code<br>
+                        // Smoothing: Arduino Example code<br>
+                        // PushButton: Arduino Example code<br>
+                        <br>
+                        //pins<br>
+                        const int left = A1; // the sensor pin for the photoresistor on the left<br>
+                        const int right = A0; // the sensor pin for the photoresistor on the right<br>
+                        const int buttonPin = 2; // the pin that senses the buttton<br>
+                        const int R = 9; // the number of the blue part of the LED, output<br>
+                        const int G = 10; // the number of the green part of the LED, output <br>
+                        const int B = 11; // the number of the red part of the LED, output<br>
+                        <br>
+                        //variables<br>
+                        int sensorValueL = 0; // the sensor value for callibration left<br>
+                        int sensorValueR = 0; // the sensor value for callibration right<br>
+                        int sensorMinL = 1023; // the minimum sensor value for callibration left<br>
+                        int sensorMaxL = 0; // the maximum sensor value for callibration left<br>
+                        int sensorMinR = 1023; // the minimum sensor value for callibration right<br>
+                        int sensorMaxR = 0; // the maximum sensor value for callibration right<br>
+                        int buttonState = 0; // variable for reading the pushbutton status<br>
+                        <br>
+                        const int numReadings = 10; // number of readings for smoothing<br>
+                        <br>
+                        //for left pin<br>
+                        int readings1[numReadings]; // array of readings from the analog input<br>
+                        int readIndex1 = 0; // the index of the current reading<br>
+                        int total1 = 0; // the running total of values<br>
+                        int average1 = 0; // the average value<br>
+                        int inputPin1 = A1; // the pin for the averaging<br>
+                        <br>
+                        //for right pin<br>
+                        int readings[numReadings]; // array of readings from the analog input<br>
+                        int readIndex = 0; // the index of the current reading<br>
+                        int total = 0; // the running total of values<br>
+                        int average = 0; // the average value<br>
+                        int inputPin = A0; // the pin for the averaging<br>
+                        <br>
+                        void setup() {<br>
+                         Serial.begin(9600);<br>
+                        // smoothing array, for if I try and use it<br>
+                        for (int thisReading = 0; thisReading < numReadings; thisReading++) { //<br>
+                         readings[thisReading] = 0;<br>
+                         }<br>
+                        <br>
+                         <br>
+                        // calibration<br>
+                        // left sensor<br>
+                         while (millis() < 5000) { //for 5 seconds<br>
+                         sensorValueL = analogRead(left); //look at sensor value of left<br>
+                        <br>
+                         if (sensorValueL > sensorMaxL) { // if larger than current max<br>
+                         sensorMaxL = sensorValueL; // set as the maximum sensor value<br>
+                         }<br>
+                        <br>
+                         if (sensorValueL < sensorMinL) { //if smaller than current min<br>
+                         sensorMinL = sensorValueL; // set as the minimum sensor value<br>
+                         } <br>
+                         } <br>
+                        // right sensor<br>
+                         while (millis() < 10000) { //for 5 more seconds<br>
+                         sensorValueR = analogRead(right); //look at sensor value of right<br>
+                        // Serial.println(sensorValueR);<br>
+                        <br>
+                         if (sensorValueR > sensorMaxR) { // if larger than current max<br>
+                         sensorMaxR = sensorValueR; // set as the maximum sensor value<br>
+                         }<br>
+                        <br>
+                         if (sensorValueR < sensorMinR) { //if smaller than current min<br>
+                         sensorMinR = sensorValueR; // set as the minimum sensor value<br>
+                         } <br>
+                         }<br>
+                         digitalWrite(13, LOW); // signal the end of the calibration period<br>
+                         <br>
+                        //pinmodes<br>
+                         int y[] = {R,G,B}; // array of the pins<br>
+                         for (int x=0; x<3; x++) { //for loop through whole array<br>
+                         int pin = y[x]; //pull out pin number<br>
+                         pinMode(pin, OUTPUT); // initialize the LED pin as an output<br>
+                         }<br>
+                         pinMode(buttonPin, INPUT); // initialize the pushbutton pin as an input<br>
+                        <br>
+                        }<br>
+                        <br>
+                        void loop() {<br>
+                        <br>
+                        buttonState = digitalRead(buttonPin); // read the state of the pushbutton value<br>
+                        int brightness = 155; // Set overall brightness<br>
+                        if (buttonState == HIGH) { // check if the pushbutton is pressed. If it is, the buttonState is HIGH<br>
+                         
+                        <br>
+                        int leftValue = analogRead(left); // read the value of left photoresistor<br>
+                        int rightValue = analogRead(right); // read the value of right photoresistor<br>
+                        //int rightValue = average;<br>
+                        //int leftValue = average1;<br>
+                        <br>
+                        <br>
+                        analogWrite(R, 0); // set red value to 0<br>
+                        <br>
+                        int greenValue = leftValue; //new variable for green value<br>
+                        greenValue = constrain(greenValue, sensorMinL, sensorMaxL); //constrain green value to to callibrated values<br>
+                        greenValue = map(greenValue, sensorMinL, sensorMaxL, 0, brightness); //map green value based on voltage of left sensor<br>
+                        greenValue = constrain(greenValue, 0, brightness); // constrain again just to be sure<br>
+                        analogWrite(G, (brightness - greenValue)); //output green color to LED<br>
+                        <br>
+                        int blueValue = rightValue; //new variable for blue value<br>
+                        blueValue = constrain(blueValue, sensorMinR, sensorMaxR); //constrain blue value to to callibrated values<br>
+                        blueValue = map(blueValue, sensorMinR, sensorMaxR, 0, brightness); //map blue value based on voltage of right sensor<br>
+                        blueValue = constrain(blueValue, 0, brightness); // constrain again just to be sure<br>
+                        analogWrite(B, (brightness -blueValue)); //output blue color to LED<br>
+                        <br>
+                        Serial.println(buttonState);<br>
+                        <br>
+                        Serial.print(&quot;left-value: &quot;);Serial.print(leftValue);Serial.print(&quot; right-value: &quot;);Serial.print(rightValue);<br>
+                        Serial.print(&quot; green-value: &quot;);Serial.print(greenValue);Serial.print(&quot; blue-value: &quot;);Serial.print(blueValue);<br>
+                        Serial.print(&quot; left range: [&quot;);Serial.print(sensorMinL);Serial.print(&quot;, &quot;);Serial.print(sensorMaxL);<br>
+                        Serial.print(&quot;] right range: [&quot;);Serial.print(sensorMinR);Serial.print(&quot;, &quot;);Serial.print(sensorMaxR);<br>
+                        Serial.println(); //Print to serial port<br>
+                        <br>
+                        delay(5);<br>
+                        <br>
+                        }<br>
+                        <br>
+                        else {<br>
+                        <br>
+                        int leftValue = analogRead(left);<br>
+                        int rightValue = analogRead(right);<br>
+                        <br>
+                        <br>
+                        analogWrite(R, 255); // set red value to 255<br>
+                        <br>
+                        int greenValue = leftValue; //new variable for green value<br>
+                        greenValue = constrain(greenValue, sensorMinL, sensorMaxL); //constrain green value to to callibrated values<br>
+                        greenValue = map(greenValue, sensorMinL, sensorMaxL, 0, brightness); //map green value based on voltage of left sensor<br>
+                        greenValue = constrain(greenValue, 0, brightness); // constrain again just to be sure<br>
+                        analogWrite(G, (brightness - greenValue)); //output green color to LED<br>
+                        <br>
+                        int blueValue = rightValue; //new variable for blue value<br>
+                        blueValue = constrain(blueValue, sensorMinR, sensorMaxR); //constrain blue value to to callibrated values<br>
+                        blueValue = map(blueValue, sensorMinR, sensorMaxR, 0, brightness); //map blue value based on voltage of right sensor<br>
+                        blueValue = constrain(blueValue, 0, brightness); // constrain again just to be sure<br>
+                        analogWrite(B, (brightness -blueValue)); //output blue color to LED<br>
+                         <br>
+                        <br>
+                        Serial.print(&quot;left-value: &quot;);Serial.print(leftValue);Serial.print(&quot; right-value: &quot;);Serial.print(rightValue);<br>
+                        Serial.print(&quot; green-value: &quot;);Serial.print(greenValue);Serial.print(&quot; blue-value: &quot;);Serial.print(blueValue);<br>
+                        Serial.print(&quot; left range: [&quot;);Serial.print(sensorMinL);Serial.print(&quot;, &quot;);Serial.print(sensorMaxL);<br>
+                        Serial.print(&quot;] right range: [&quot;);Serial.print(sensorMinR);Serial.print(&quot;, &quot;);Serial.print(sensorMaxR);<br>
+                        Serial.println();<br>
+                        <br>
+                        delay(5);<br>
+                        <br>
+                        }<br>
+                        } 
+                    </p>
+                </div>
+            <h2 class="assigns">Operation</h2>
+            <img src="A3-1.gif" height="400">
+            <img src="A3-2.gif" height="400">
+            <p class="white">
+                This is a gif of the operation of the circuit. The program takes inputs from the two photoresistors and the button and outputs different values to the RGB LED.
+                Basically, the LED starts off as red and the color changes as the light changes in either photoresistor.
+                Covering the right photoresistor adds blue light to the red light, so it fades to purple. 
+                Covering the left photoresistor adds green light to the red light, so it fades to yellow. 
+                Covering them both makes the light go close to white, but still more red (because green and blue go only up to 100).
+                If you hold down the button, the red light turns off, so the light will fade between just green or blue.
+                <br><br>
+                This program also auto-calibrates the photoresistors for the first 10 seconds of the program (5 each) for more accurate voltage readings
+                and smoother fading.
+                
+               
+
+            </p>
+            
+            
+        </div>
+        
+    </body>
+</html>
