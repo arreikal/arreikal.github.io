@@ -1,0 +1,159 @@
+<!DOCTYPE html> 
+<html> 
+    <head> 
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+
+        <title>Kierra Long's HCDE 439 Physical Computing Page!</title> 
+        <link rel="icon" type="image/png" href="favicon6.png">
+        <!-- Favicon from: https://adversurge.com/ -->
+        <link href="style.css" media="screen" rel="stylesheet" type="text/css" />
+
+    </head> 
+    <body> 
+
+        <div class="header">
+            <h1>A4: Libraries!</h1>
+            <h2>Anti-Loneliness Bot 4000</h2>
+            <!-- <a float="right" href="index.html"><img float="right" src="favicon5.png"height="50"></a><a float="right" href="index.html">Home</a> -->
+
+            <h3>Kierra Long<br><br></h3>
+            <h2 class="assigns">Schematic</h2>
+                
+                <img src="A4-C.png" height=400>
+                <p class="white">This is my schematic of the circuit. 
+                    It is made of a Servo (as output) and a Capacitator (as input). A 10 uF Electolytic Capacitor is connected from pin 4 (Output Pin), then 
+                    to four 1M Ohm resistors, to pin 2 (Sensor Pin).The servo is attached to Pin 9 (a PWM pin), ground, and power, through its cables.
+                    <br><br>
+                    Resistor Rational:
+                    <br>
+                    Keeping in mind that a resistor of 1M Ohm with the capacitator will require absolute touch, and a resistor of 
+                    10M Ohm will result in 4-6 inches of range (from the lecture slides), I decided to find a balance of resistors that 
+                    would make the capacitor a bit more sensitive than absolute touch. I played around with adding a few 1M Ohm resistors,
+                    and 4 seemed like a good sensitivity. I decided to use 4M Ohm resistance in my capacitor circuit.<br><br>
+                    
+                    Created with https://www.circuit-diagram.org/
+
+                    </p>
+
+            <h2 class="assigns">Circuit</h2>
+                <img src="A4-S.jpg" height=400>
+                <p class="white">This is the circuit based off of the previous schematic, made using a breadboard and Arduino.
+                    To use the Servo as the robot, I taped a paper hand on top of the part that moves. 
+                </p>
+            <h2 class="assigns">Code</h2>
+                <div class="code">
+                    <p class="code">
+                        //Sources<br>
+//Example code from Arduino for Smoothing and Callibration<br>
+<br>
+#include <CapacitiveSensor.h> //Capacitator Library<br>
+#include <Servo.h> //Servo Library<br>
+<br>
+Servo myServo; // create a servo object<br>
+CapacitiveSensor cs_4_2 = CapacitiveSensor(4,2); //create the capacitor sensor object <br>
+<br>
+//Smoothing variables<br>
+const int numReadings = 10; //Reading var for smoothing<br>
+int readings[numReadings]; // the readings from the analog input<br>
+int readIndex = 0; // the index of the current reading<br>
+int total = 0; // the running total<br>
+int average = 0; // the average<br>
+<br>
+<br>
+//Callibration variables<br>
+int sensorValue = 0; // the sensor value<br>
+int sensorMin = 1023; // minimum sensor value<br>
+int sensorMax = 0; // maximum sensor value<br>
+int newValue = 0; // maximum sensor value<br>
+<br>
+int angle= 0; // setting the angle of the servo<br>
+int inputPin = 2; //setting input pin of capacitor<br>
+<br>
+void setup() {<br>
+ Serial.begin(9600); // initialize serial communication with computer<br>
+ myServo.attach(9); // attach pin 9 to the servo object<br>
+<br>
+ //Smoothing<br>
+ for (int thisReading = 0; thisReading < numReadings; thisReading++) {<br>
+ readings[thisReading] = 0; // initialize all the readings to 0:<br>
+ }<br>
+<br>
+ //Callibration<br>
+ while (millis() < 5000) { //For first 5 seconds<br>
+ sensorValue = cs_4_2.capacitiveSensor(30); //take the value of the capacitor<br>
+ if (sensorValue > sensorMax) { //if larger than current max<br>
+ sensorMax = sensorValue; // record the max sensor value<br>
+ }<br>
+ if (sensorValue < sensorMin) { //if smaller than current min<br>
+ sensorMin = sensorValue; // record the minimum sensor value<br>
+ }<br>
+ }<br>
+}<br>
+<br>
+void loop() {<br>
+ //Smoothing the capacitor value<br>
+ total = total - readings[readIndex]; // subtract the last reading:<br>
+ readings[readIndex] = cs_4_2.capacitiveSensor(30); //set reading to sensor reading<br>
+ total = total + readings[readIndex]; // add the reading to the total:<br>
+ readIndex = readIndex + 1; // advance to the next position in the array:<br>
+ if (readIndex >= numReadings) { // if we're at the end of the array...<br>
+ readIndex = 0; // ...wrap around to the beginning:<br>
+ }<br>
+ average = total / numReadings; // calculate the average<br>
+<br>
+ <br>
+ newValue = average; // making a new value to constrain<br>
+ if (average > sensorMax) { //if out of bounds<br>
+ newValue = sensorMax; //set as in bound<br>
+ } else if (average< sensorMin) { //if out of bounds<br>
+ newValue = sensorMin; //set as in bound<br>
+ }<br>
+<br>
+ angle = map(average, sensorMin, sensorMax, 0, 90); //map capacitor reading to angle value between 0 and 90<br>
+ myServo.write(angle); //write the angle to the servo<br>
+ delay(15); //wait a bit<br>
+<br>
+ //Serial printing for debugging <br>
+// Serial.print(&quot;Min &quot;); <br>
+// Serial.print(sensorMin);<br>
+// Serial.print(&quot; Max &quot;);<br>
+// Serial.print(sensorMax);<br>
+// Serial.print(&quot; before &quot;);<br>
+// Serial.print(average);<br>
+// Serial.print(&quot; after &quot;);<br>
+// Serial.println(newValue);<br>
+<br>
+Serial.println(angle);<br>
+ delay(100);<br>
+} 
+                    </p>
+                </div>
+                <p class="white">
+                    
+                    The capacitor touch is the input, and the servo angle is the output. To make this, 
+                    I used a library for both the capacitor and Servo, code to callibrate the capacitor, as well as smooth the result, and I mapped the input capacitor circuit voltage
+                    to Servo angle (after being constrained to max and min values). The calibration during the first 5 seconds of the program measures the highest and lowest values the input
+                    pin reads, and ensures accuracy by constraining the voltage readings later to these values. 
+                    
+                    
+                   
+    
+                </p>
+            <h2 class="assigns">Operation</h2>
+            <img src="A4-G.gif" width="400">
+            <p class="white">
+                This is a gif of the operation of the Anti-Loneliness Bot 4000. In spirit of Valentine's day I made the Anti-Loneliness Bot 4000, who will always be here to hold your hand :'). 
+                If you touch the capacitor, the Anti-Loneliness Bot 4000 will move its hand to put it on top of yours. But if you leave the Anti-Loneliness Bot 4000's hand, it will pull its hand away too.
+                
+                
+                
+               
+
+            </p>
+            
+            
+        </div>
+        
+    </body>
+</html>
