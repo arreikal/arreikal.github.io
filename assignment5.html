@@ -1,0 +1,143 @@
+<!DOCTYPE html> 
+<html> 
+    <head> 
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+
+        <title>Kierra Long's HCDE 439 Physical Computing Page!</title> 
+        <link rel="icon" type="image/png" href="favicon6.png">
+        <!-- Favicon from: https://adversurge.com/ -->
+        <link href="style.css" media="screen" rel="stylesheet" type="text/css" />
+
+    </head> 
+    <body> 
+
+        <div class="header">
+            <h1>A5: High(er) voltage and transistors!</h1>
+            <h2>[Heating and] Cooling Device</h2>
+            <!-- <a float="right" href="index.html"><img float="right" src="favicon5.png"height="50"></a><a float="right" href="index.html">Home</a> -->
+
+            <h3>Kierra Long<br><br></h3>
+            <h2 class="assigns">Schematic</h2>
+                
+                <img src="A5-S.png" height=400>
+                <p class="white">
+                    This circuit uses a mosfet 30n06l (N) transistor with a fan motor as the load (from drain), arduino pin 6 connected to gate, and ground (wall) as drain.
+                    Pin 6 is controlled by input from an IR sensor and remote, connected to pins 2, Arduino Ground and +5V. 
+                    Also determined by the input of the IR sensor is RGB LED, connected through resistors to pins 11, 10, 9, as well as Arduino Ground.
+                    
+                    <br><br>
+                    Resistor Rational:
+                    <br>
+                    For Blue LEDs: <br>(5V-3.3V)=(0.02A)(X)<br>(1.7V)=(0.02A)(X)<br>X=85 Ohms  <br>Round up to 100 Ohm resistor.<br><br>
+                    For Green, Red LEDs: <br>(5V-1.8V)=(0.02A)(X)<br>(3.2V)=(0.02A)(X)<br>X=160 Ohms  <br>Round up to 220 Ohm resistor.<br><br>
+                    <br><br>
+                    Voltages:
+                    <br>
+                    The load is connected to a 12V AC adapter wall plug. This power goes throught the fan, and through the transistor and back out to ground. 
+                    There is also a 5V power source that comes from the arduino output pin. This goes to the transistor to open the gate and let the power flow through the fan's loop.
+                    The 5V power pin is also used to power the IR sensor.
+                    <br><br>
+                    Created with https://www.circuit-diagram.org/
+
+                    </p>
+
+            <h2 class="assigns">Circuit</h2>
+                <img src="A5-C.jpg" height=400>
+                <p class="white">This is the circuit based off of the previous schematic.</p>
+            <h2 class="assigns">Code</h2>
+                <div class="code">
+                    <p class="code">
+                        // sources: IR Sensor code from lecture slides, help from Fungineers on YouTube
+                        <br><br>
+                        #include <IRremote.h> //get library for IR Remote<br>
+                            #define heat 0xFF906F // define the up button<br>
+                            #define cool 0xFFE01F // dfinee thee down button<br>
+                            <br>
+                            const int RECV_PIN = 2; //the pin of the IR Reciever<br>
+                            IRrecv irrecv(RECV_PIN); // recieving<br>
+                            decode_results results; // decode results<br>
+                            <br>
+                            <br>
+                            const int B = 9; // the number of the blue part of LED <br>
+                            const int G = 10; // the number of the green part of LED <br>
+                            const int R = 11; // the number of the red part of LED <br>
+                            <br>
+                            int heatorcool = 1; //int for keeping track of heating or cooling<br>
+                            <br>
+                            void setup() {<br>&emsp;
+                             pinMode(2, INPUT); //initialize sensor pin<br>&emsp;
+                             pinMode(11, OUTPUT); //initialize LED pins<br>&emsp;
+                             pinMode(10, OUTPUT); //initialize LED pins<br>&emsp;
+                             pinMode(9, OUTPUT); //initialize LED pins<br>&emsp;
+                            //int buttonState = 0; <br>&emsp;
+                            Serial.begin(9600);<br>&emsp;
+                            irrecv.enableIRIn(); // set up IR reciever<br>&emsp;
+                             irrecv.blink13(true); // set up IR reciever blink<br>
+                            <br>
+                            }<br>
+                            <br>
+                            void loop() {<br>
+                            <br>
+                            <br>
+                             if (irrecv.decode(&amp;results)){ //if there is a button pressed<br>&emsp;
+                             Serial.println(results.value, HEX); //print the button<br>
+                             <br>
+                            <br>
+                             switch (results.value) { // do something based on the result<br>&emsp;
+                             case heat: // if up button was pushed<br>&emsp;
+                             analogWrite(R, 255); // set red value<br>&emsp;
+                             analogWrite(G, 45); // set green value<br>&emsp;
+                             analogWrite(B, 0); // set blue value<br>&emsp;
+                             digitalWrite(6, LOW); // turn to no voltage to transistor<br>&emsp;
+                             break; //break from case<br>&emsp;
+                             case cool: // if down button was pushed<br>&emsp;
+                             analogWrite(R, 45); // set red value<br>&emsp;
+                             analogWrite(G, 0); // set green value<br>&emsp;
+                             analogWrite(B, 255); // set blue value<br>&emsp;
+                             digitalWrite(6, HIGH); // turn to High voltage to transistor<br>&emsp;
+                             break; //break from case<br>
+                            <br>
+                             <br>
+                             }<br>
+                             irrecv.resume(); //resume scanning<br>
+                             }<br>
+                            <br>
+                            }
+                    </p>
+                </div>
+                <p class="white">
+                    
+                    This operation uses the IR Remote sensing library to obtain and decode the button presses from the remote.
+                    
+                   
+    
+                </p>
+            <h2 class="assigns">Operation</h2>
+            <img src="A5-G.gif" width="400">
+            <p class="white">
+                This is a Gif of the operation of the [Heating and] Cooling Device. The way this works is that
+                the up arrow on the remote initiates the "heating" mode (really it just turns on a warm-toned light),
+                and the down arrow on the remote operates the cooling mode, which turns on the fan and a cool-toned light.
+                <br>
+                <br>The IR Remote sends a IR signal to the IR sensor, which is then decoded in the arduino code, and depending on
+                which button was pressed, either outputs LOW power or HIGH power to the gate of the transistor. The transistor gate opens when
+                the voltage is HIGH, which completes the circuit for the fan (the load of the transistor, connected to drain), which is connected to 12V power
+                from the wall.
+                <br>
+                <br>
+                Unresolved bugs:
+                <br>
+                I intended for this code to be able to toggle the fan on and off based on the remote up and down buttons,
+                however, after the cooling button was pushed, it would stop reading other buttons or acting on them. Because of this,
+                I was only able to turn the fan on once without having to re-upload the code to the Arduino. I was unable to 
+                troubleshoot this.
+               
+
+            </p>
+            
+            
+        </div>
+        
+    </body>
+</html>
