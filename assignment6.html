@@ -1,0 +1,303 @@
+<!DOCTYPE html> 
+<html> 
+    <head> 
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+
+        <title>Kierra Long's HCDE 439 Physical Computing Page!</title> 
+        <link rel="icon" type="image/png" href="favicon6.png">
+        <!-- Favicon from: https://adversurge.com/ -->
+        <link href="style.css" media="screen" rel="stylesheet" type="text/css" />
+
+    </head> 
+    <body> 
+
+        <div class="header">
+            <h1>A6: Talking to the web!</h1>
+            <h2>Find-a-mouse game</h2>
+            <!-- <a float="right" href="index.html"><img float="right" src="favicon5.png"height="50"></a><a float="right" href="index.html">Home</a> -->
+
+            <h3>Kierra Long<br><br></h3>
+            <h2 class="assigns">Schematic</h2>
+                
+                <img src="A6-S.png" height=700>
+                <p class="white">
+                    This circuit uses a joystick, Servo, and two LEDs to connect to an arduino. The Joystick is connected to ground, power,
+                    two analog input pins, and 1 digital input pin. The Servo is connected to ground, power, and 1 PWM pin. The two LEDs connect to pins 7 and 9 and 
+                    as well as two 220 Ohm resistors.
+                    
+                    <br><br>
+                    Resistor Rational:
+                    <br>
+                    For Yellow and Red LEDs: <br>(5V-1.8V)=(0.02A)(X)<br>(3.2V)=(0.02A)(X)<br>X=160 Ohms  <br>Round up to 220 Ohm resistor.<br><br>
+    
+                
+                    <br>
+                    Created with https://www.circuit-diagram.org/ and Canva
+
+                    </p>
+
+            <h2 class="assigns">Circuit</h2>
+                <img src="A6-C.jpg" width=400>
+                <p class="white">This is the circuit based off of the previous schematic. I taped red and yellow paper onto the 
+                    arms of the Servo to correspond to two different angles that could be read, signalled by the lights.
+                </p>
+            <h2 class="assigns">Code</h2>
+            <p class="white">
+                Sources: Code comes from a mix of class powerpoint slides, built-in arduino example code, and p5.js reference code from the website.
+                <br><br>
+                Arduino code:
+            </p> 
+            <div class="code"> 
+            <p class="code">
+                #include < Servo.h > //Servo Library<br>
+                Servo myServo; // create a servo object<br>
+                <br>
+                int VRx = A1; // x value pin<br>
+                int VRy = A0; // y value in<br>
+                int SW = 2; // button press pin<br>
+                <br>
+                int xPosition = 0;  // initialize x position <br>
+                int yPosition = 0; // initialize y position<br>
+                int SW_state = 0; // initializ button state<br>
+                int mapX = 0; // new variable for mapped values<br>
+                int mapY = 0; // new variable for mapped values<br>
+                <br>
+                int angle = 0;<br>
+                int newAngle = 0;<br>
+                 <br>
+                void setup() {<br>
+                 Serial.begin(9600); // start serial <br>
+                 <br>
+                 pinMode(VRx, INPUT); // initialize pin for x<br>
+                 pinMode(VRy, INPUT); // initialize pin for y<br>
+                 pinMode(SW, INPUT_PULLUP); // initialize buttin press pin<br>
+                 myServo.attach(11); // attach pin 11 to the servo object<br>
+                 Serial.setTimeout(10); // set the timeout for parseInt<br>
+                 pinMode(9, OUTPUT); // initialize LED pin<br>
+                 pinMode(8, OUTPUT); // initialize LED pin, this was for debugging when I was switching things around<br>
+                 pinMode(7, OUTPUT); // initialize LED pin<br>
+                }<br>
+                <br>
+                void loop() {<br>
+                 if (Serial.available() > 0) { // if there's serial data <br>
+                 int inByte = Serial.read(); // read it<br>
+                // Serial.write(inByte); // send it back out as raw binary data<br>
+                 newAngle = inByte; // set the new angle as what was sent from p5<br>
+                 }<br>
+                <br>
+                 xPosition = analogRead(VRx); // find x position of joystick<br>
+                 yPosition = analogRead(VRy); // find y position of joystick<br>
+                 SW_state = digitalRead(SW); // read button press<br>
+                 mapX = map(xPosition, 0, 1023, 0, 800); // map x-value to canvas size<br>
+                 mapY = map(yPosition, 0, 1023, 0, 800); // map y-value to canvas size<br>
+                <br>
+                <br>
+                 // serial print the coordinate to p5<br>
+                 Serial.print(&quot;[&quot;);<br>
+                 Serial.print(mapX);<br>
+                 Serial.print(&quot;,&quot;);<br>
+                 Serial.print(mapY);<br>
+                 Serial.println(&quot;]&quot;);<br>
+                <br>
+                <br>
+                 if (newAngle<180) { // red pointer would correspond to this<br>
+                 digitalWrite(7, HIGH); // turn on the red light<br>
+                 digitalWrite(9, LOW); // turn off the yellow light<br>
+                 angle = newAngle; // set the angle to the input angle<br>
+                 } else { // yellow pointer would correspond to this (opposite angle)<br>
+                 digitalWrite(9, HIGH); // turn on the yellow light<br>
+                 digitalWrite(7, LOW); // turn off the red light<br>
+                 angle= newAngle-180; // set the angle to accross the input angle (the opposite angle)<br>
+                 }<br>
+                 myServo.write(angle); // write the correct anglee to the servo<br>
+                 }
+            </p></div>
+            <p class="white">
+                sketch.js code:
+                
+            </p>
+            <div class="code">
+            <p class="code">
+                var serial; // variable to hold an instance of the serialport library<br>
+                var portName = '/dev/tty.usbmodem143201' //rename to the name of your port tty.usbmodem143201<br>
+                var datain; //some data coming in over serial!<br>
+                // var xPos = 0; // xPos for graphing<br>
+                var dataarray = [0,0]; // initialize array for data from arduino<br>
+                var joyX = 0; // the x coordinate of joystick<br>
+                var joyY = 0; // the y coordinate of joystick<br>
+                var calcAngle = 0; // a variable for calculating inverse tan<br>
+                var angle = 0; // the angle variable<br>
+                <br>
+                function setup() {<br>
+                 serial = new p5.SerialPort(); // make a new instance of the serialport library<br>
+                 serial.on('list', printList); // set a callback function for the serialport list event<br>
+                 serial.on('connected', serverConnected); // callback for connecting to the server<br>
+                 serial.on('open', portOpen); // callback for the port opening<br>
+                 serial.on('data', serialEvent); // callback for when new data arrives<br>
+                 serial.on('error', serialError); // callback for errors<br>
+                 serial.on('close', portClose); // callback for the port closing<br>
+                 <br>
+                 serial.list(); // list the serial ports<br>
+                 serial.open(portName); // open a serial port<br>
+                 createCanvas(800, 800); // make a square canvas<br>
+                 background(0x100, 0x16, 0x90); // set the background color<br>
+                <br>
+                 noCursor(); // hide the cursor so you can find it<br>
+                 noStroke(); // hide strokes<br>
+                }<br>
+                 <br>
+                // get the list of ports:<br>
+                function printList(portList) {<br>
+                 // portList is an array of serial port names<br>
+                 for (var i = 0; i < portList.length; i++) {<br>
+                 // Display the list the console:<br>
+                 print(i + &quot; &quot; + portList[i]);<br>
+                 }<br>
+                }<br>
+                <br>
+                function serverConnected() { //printing status: server connected<br>
+                 print('connected to server.');<br>
+                }<br>
+                 <br>
+                function portOpen() { //printing status: port opened<br>
+                 print('the serial port opened.')<br>
+                }<br>
+                 <br>
+                function serialError(err) { //printing status: serial error<br>
+                 print('Something went wrong with the serial port. ' + err);<br>
+                }<br>
+                 <br>
+                function portClose() { //printing status: port closed<br>
+                 print('The serial port closed.');<br>
+                }<br>
+                <br>
+                function serialEvent() { // function to read serial event<br>
+                 if (serial.available()) { // if theres a serial event to read<br>
+                 var datastring = serial.readLine(); // readin some serial<br>
+                 var newarray; // make a new array<br>
+                 try {<br>
+                 newarray = JSON.parse(datastring); // can we parse the serial<br>
+                 } catch(err) { //error<br>
+                 //console.log(err);<br>
+                 }<br>
+                 if (typeof(newarray) == 'object') { // if the coordinate was successfully read and turned into an array<br>
+                 dataarray = newarray; // set it as the data<br>
+                 }<br>
+                 // console.log(&quot;got back &quot; + datastring); //for debugging<br>
+                 if(newarray != undefined) { // if the coordinate was successfully read and turned into an array<br>
+                 // console.log(&quot;got back &quot; + newarray[0]); //for debugging<br>
+                 // console.log(&quot;got back &quot; + newarray[1]); //for debugging<br>
+                 joyX=newarray[0]; //update joyX to x coordinate<br>
+                 joyY=800-newarray[1]; //update joyY to y coordinate (subtract from 800 so its not inversed)<br>
+                 }<br>
+                 }<br>
+                }<br>
+                <br>
+                function draw() {<br>
+                 background(0x100, 0x16, 0x90); // set background color<br>
+                 if(abs(joyX-mouseX)<10 &amp;&amp; abs(joyY-mouseY)<10) { // check if joystick and mouse are in the same spot<br>
+                 background(0x16, 0x16, 0x16); // change background color to signal you win!<br>
+                 }<br>
+                 // ellipse(mouseX, mouseY, 33, 33); // for debugging<br>
+                <br>
+                 ellipse(joyX, joyY, 50, 50); // make circle to be where the joystick is<br>
+                 var directiontomouse; // make a variable for the angle to the mouse<br>
+                 directiontomouse = getAngle(); // call angle finder<br>
+                 console.log(&quot;dirction to mouse= &quot; + directiontomouse); // output angle to console (for debugging)<br>
+                 serial.write(directiontomouse); // send the direction from joystick to the mouse back to the arduino<br>
+                }<br>
+                <br>
+                function getAngle() { // find the angle from joystick to the mouse<br>
+                 var difX; // make a new var for x difference<br>
+                 var difY; // make a new var for y difference<br>
+                 difX = joyX-mouseX; // find dif<br>
+                 difY = joyY-mouseY; // find dif<br>
+                 // console.log(&quot;difX= &quot; + difX + &quot; difY= &quot; + difY); // for debugging<br>
+                 calcAngle=atan(difY/difX)*180.0/3.14; //calculate the angle<br>
+                 // console.log(&quot;angle= &quot; + calcAngle); // for debugging<br>
+                <br>
+                 // mapping inverse tan to the actual angle i'm looking for <br>
+                 if((mouseX > joyX)&amp;&amp;(mouseY == joyY)) { // mouse is directly right of joystick<br>
+                 angle=0;<br>
+                 }<br>
+                 else if ((mouseX < joyX)&amp;&amp;(mouseY == joyY)) { // mouse is directly left of joystick<br>
+                 angle=180;<br>
+                 }<br>
+                 else if((mouseX == joyX)&amp;&amp;(mouseY > joyY)) { // mouse is directly below joystick<br>
+                 //OTHER LIGHT SHOULD TURN ON<br>
+                 angle=270;<br>
+                }<br>
+                 else if ((mouseX == joyX)&amp;&amp;(mouseY < joyY)) { // mouse is directly above of joystick<br>
+                 angle=90;<br>
+                 }<br>
+                 else if ((mouseX > joyX)&amp;&amp;(mouseY < joyY)) // Quadrant 1 <br>
+                 {<br>
+                 angle=abs(calcAngle);<br>
+                 }<br>
+                 else if ((mouseX > joyX)&amp;&amp;(mouseY > joyY)) // Quadrant 4 <br>
+                 {<br>
+                 angle=360-calcAngle;<br>
+                 }<br>
+                 else if ((mouseX < joyX)&amp;&amp;(mouseY > joyY)) // Quadrant 3<br>
+                 {<br>
+                 angle=180+abs(calcAngle);<br>
+                 }<br>
+                 else if ((mouseX < joyX)&amp;&amp;(mouseY < joyY)) // Quadrant 2<br>
+                 {<br>
+                 angle=180-calcAngle;<br>
+                 }<br>
+                 return angle; // return new angle<br>
+                }<br>
+                
+            </p></div>
+            
+                <p class="white">
+                    calculations & values: 
+                    <br>
+                    The inputs from the joystick x anf y values return a number between 0 and 1023 (the standard for analog in).
+                    I took these values and mapped them to the size of the canvas (0-800) so that the joystick can go anywhere on the p5.js canvas. 
+                    For the angle from the Joystick to cursor, I started by finding the difference in X and Y values. Then, 
+                    I took the inverse tangent of this to find the angle (in radians), and converted it to degrees. Then,
+                    depending on the quadrant the mouse is in relative to the joystick, I wrote different behavior for setting the angle. This ensured 
+                    that as you went around counter clockwise from the orgin, the angle grows from 0 to 360. This is the angle 
+                    that I sent back to arduino. Because the Servo can only write up to 180, if the angle was above 180, I had to subtract 180 to get the opposite angle and 
+                    turn on the yellow light.
+                </p>
+            <h2 class="assigns">Gameplay</h2>
+            <p class="white">
+                Link to the Find-a-mouse game page (if it even works) 
+            </p>
+            <a href="/p5/hcde439-example/index.html">here.<br><br></a>
+            <iframe width="840" height="473" src="https://www.youtube.com/embed/rXk2NEMyxsk" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <p class="white">
+                Goal: Use the joystick to find the hidden mouse cursor by following the direction the Servo points.
+                <br><br>
+                Rules of the game:
+                <br><br>
+                1. move your mouse randomly to set the objective point<br>
+                2. look at the direction of the servo to see where to move your joystick<br>
+                3. if the red light is on, follow the red servo arm. If the yellow light is on, follow the yellow arm<br>
+                4. move the joystick around to find the mouse pointer<br>
+                5. when you locate the mouse pointer, the screen will go black<br>
+                6. move the mouse randomly and play again!<br><br>
+
+                This is a web game I created that uses input from the Arduino joystick (x and y positions) to control a circle 
+                on the screen using p5.js. Additionally, moving the cursor on the screen causes the p5.js to calculate the angle 
+                from the joystick to the mouse and sends this angle back to arduino. The arduino takes this angle writes the servo 
+                to the angle, and lights up an LED to signal which arm of the Servo is at the correct angle. I had to use a 2-armed approach with 
+                the servo since it can only write between 0 and 180 degrees, whereas I needed 360 degrees.
+                <br><br>
+                The way that the p5.js code works is that it takes the input of the coordinate of the joystick, converting it to values,
+                and then drawing a dot in that location (mapped to the canvas). Moving the joystick moves the dot. When the joystick is within 10px of the 
+                coordinates of the mouse, the screen goes black to signal that it's the right spot.
+                <br><br>
+                This program took alot of trigonometry and mapping to corectly line up the angle of the mouse cusor to the angle on the Servo.
+        
+            </p>
+            
+            
+        </div>
+        
+    </body>
+</html>
