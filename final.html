@@ -1,0 +1,232 @@
+<!DOCTYPE html> 
+<html> 
+    <head> 
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+
+        <title>Kierra Long's HCDE 439 Physical Computing Page!</title> 
+        <link rel="icon" type="image/png" href="favicon6.png">
+        <!-- Favicon from: https://adversurge.com/ -->
+        <link href="style.css" media="screen" rel="stylesheet" type="text/css" />
+
+    </head> 
+    <body> 
+
+        <div class="header">
+            <h1>Hot Drink Reminder Coaster</h1>
+            <!-- <a float="right" href="index.html"><img float="right" src="favicon5.png"height="50"></a><a float="right" href="index.html">Home</a> -->
+
+            <h3>Kierra Long</h3>
+            <h2 class="assigns">Concept</h2>
+                <p class="white">The concept for my final project is a coaster that will remind me to drink my tea before it gets cold.</p>
+                <img src="F-CN.png" height=400>
+                <h2 class="assigns">Schematic</h2>
+                
+                <img src="F-S.png" height=400>
+                <p class="white">
+                    This is the schematic of my circuit. I used an Arduino Nano to control the circuit. I used 
+                    a voltage divider (from power to ground) with a 10K Ohm and a Thermistor (connected to pin A0) to take temperature voltage readings. 
+                    The circuit also has a pushbutton and a passivee buzzer. The Pushbutton uses a 10K Ohm resistor to limit current as 
+                    the power flows to ground.
+                    <br><br>
+                    I used 10K Ohm resistors to significantly slow current so that there would never be a moment 
+                    when unregulated current would flow.
+                    <br><br>
+                    Created with https://www.circuit-diagram.org/ & Canva
+
+                </p>
+
+            <h2 class="assigns">Circuit</h2>
+                <img src="F-C1.jpg" height=400>
+                <img src="F-C2.jpg" height=400>
+                <img src="F-CG.gif" height=400>
+                <p class="white">
+                    This is my circuit. I used two mini breadboards stuck together, with the Arduino pushed into one,
+                    and the button, buzzer, and resistors on the other side. I used wirs without the stiff part so that I could 
+                    keep everything close to the breadboard, except for the thermistor.
+                </p>
+            <h2 class="assigns">Code</h2>
+                <div class="code">
+                    <p class="code">
+                        // variables<br>
+int roomTemp = 0; // The tracker of the average room temp<br>
+int hottest = 0; // The tracker of the average hottest temp<br>
+int goal; // The the goal thermistor reading to signal drink is ready<br>
+boolean startup = false; // The variable to track if the program just started<br>
+int buttonState = 0; // Button state<br>
+int times = 0; // Unused variable to keep track of time<br>
+int totalRoomTemp = 0; // Tracks total of room temp readings<br>
+int totalHottest = 0; // Tracks total of hottest readings<br>
+int current; // the current A0 thermistor reading<br>
+boolean over = false; // keeps track of whether the session just endeed<br>
+unsigned long startingTime; // remembers time of last callibration<br>
+unsigned long cTime; // keeps track of current time<br>
+ <br>
+//pins<br>
+int buzzer = 9; // buzzer pin<br>
+int button = 2; // button pin<br>
+int therm = A0; // thermistor pin<br>
+<br>
+void setup() {<br>
+ startup = true; // set startup as true<br>
+ Serial.begin(9600); // begin serial write<br>
+ pinMode(therm, INPUT); // initialize<br>
+ pinMode(buzzer, OUTPUT); // initialize<br>
+ pinMode(button, INPUT); // initialize<br>
+}<br>
+<br>
+void loop() {<br>
+ // put your main code here, to run repeatedly:<br>
+ buttonState = digitalRead(button); // read button state<br>
+ if (startup) { // if everything got reset<br>
+ buttonState = HIGH; // set buttonstate falsely on to trigger callibration<br>
+ startup=false; //turn startup to false<br>
+ }<br>
+ if (buttonState == HIGH) { // time to calibrate<br>
+ tone(9, 261); //Short tone to signal room temp started<br>
+ delay(100); // wait<br>
+ noTone(9); // turn off buzzer<br>
+ delay(100); // wait<br>
+ // reset the variables<br>
+ roomTemp=0; // reset room temp value<br>
+ hottest=0; // reset hottest value<br>
+ goal=0; // reset goal<br>
+ totalRoomTemp = 0; // reset total room temp<br>
+ totalHottest = 0; // reset total hottest<br>
+ over = false; // allow it to work<br>
+<br>
+ // add room temperature values for 10 seconds<br>
+ for (int i=0; i<20; i++) { // for 10 seconds<br>
+ totalRoomTemp += analogRead(therm); // add to count<br>
+// Serial.println(analogRead(A0)); <br>
+ delay(500); // wait half a second<br>
+ }<br>
+ <br>
+ roomTemp = totalRoomTemp/20; // average the values to find average V reading<br>
+ <br>
+// Serial.print(&quot;room temp: &quot;);<br>
+// Serial.println(roomTemp);<br>
+ <br>
+ // play two tones to signal putting on the cup<br>
+ tone(9, 261); //play tone<br>
+ delay(100); //wait<br>
+ noTone(9); //stop tone<br>
+ delay(100); //wait<br>
+ tone(9, 261); //play tone<br>
+ delay(100); //wait<br>
+ noTone(9); //stop tone<br>
+ delay(100); //wait<br>
+<br>
+ delay(180000); //wait 3 minutes for the mug to even out temperature<br>
+<br>
+ //add up hot values for 10 seconds<br>
+ for (int i=0; i<20; i++) { // for 10 seconds<br>
+ totalHottest += analogRead(therm); // add to count<br>
+ // Serial.println(analogRead(A0)); <br>
+ delay(500); // wait half a second<br>
+ }<br>
+ hottest = totalHottest/20; //average<br>
+ <br>
+// Serial.print(&quot;hottest: &quot;);<br>
+// Serial.println(hottest);<br>
+<br>
+ // IDEALLY: hotter temperature gives lower reading than room temperature<br>
+ int diff = roomTemp - hottest; // calculate difference<br>
+ if (diff<0) { // if temperature actually increases<br>
+ // error so beep wierdly<br>
+ tone(9, 280); <br>
+ delay(500);<br>
+ noTone(9);<br>
+ delay(200);<br>
+ tone(9, 280); <br>
+ delay(200);<br>
+ noTone(9);<br>
+ delay(200);<br>
+ tone(9, 280); <br>
+ delay(200);<br>
+ noTone(9);<br>
+ delay(200);<br>
+ tone(9, 280); <br>
+ delay(500);<br>
+ noTone(9);<br>
+ delay(200);<br>
+ over= true; //turn off<br>
+ }<br>
+<br>
+ // set a goal V value<br>
+ goal = roomTemp-.80*diff; // 20% of the way to room temperature<br>
+ <br>
+// Serial.print(&quot;goal: &quot;);<br>
+// Serial.println(goal);<br>
+<br>
+ // 3 beeps to signal end of callibration<br>
+ for (int i=0; i<3; i++) { // 3 times<br>
+ tone(9, 261); // set tone<br>
+ delay(100); //wait<br>
+ noTone(9); //turn off<br>
+ delay(100); //wait<br>
+ }<br>
+<br>
+ startingTime= millis(); // record the time of the cooling start<br>
+ }<br>
+<br>
+ current = analogRead(therm); // read the thermistor reading<br>
+ cTime = millis(); // get current time<br>
+ <br>
+ if (current > goal &amp;&amp; current<1023 &amp;&amp; over != true) { // if the reading is beyond the goal<br>
+ //alert user that it's ready<br>
+ for (int i=0; i<3; i++) { // three times<br>
+ tone(9, 261); // set tone<br>
+ delay(500); // longer beep<br>
+ noTone(9); // turn off<br>
+ delay(500); // longer beep<br>
+ }<br>
+ over = true; //tell to stop beeping<br>
+ }<br>
+ if (cTime-startingTime > 900000) { //it's been on more than 15 minutes<br>
+ //long beep to signal<br>
+ tone(9, 261); // set tone<br>
+ delay(1000); // long beep<br>
+ noTone(9); // stop sound<br>
+ over = true; // tell it to stop<br>
+ }<br>
+ <br>
+ while (over &amp;&amp; (buttonState == LOW)) { // if it's off<br>
+ //idle <br>
+ delay(100); // wait<br>
+ buttonState = digitalRead(button); // check button<br>
+ }<br>
+ <br>
+ delay(100); // wait <br>
+}
+                    </p>
+                </div>
+            <h2 class="assigns">Form</h2>
+            <img src="F-6.png" width="500">
+            <img src="F-7.png" width="500">
+            <img src="F-1.jpg" height="400">
+            <img src="F-2.jpg" height="400">
+            <img src="F-3.jpg" height="400">
+            <img src="F-4.jpg" height="400">
+            <img src="F-5.jpg" height="400">
+            
+            <p class="white">
+               To make the coaster, I designed a 3D model in OnShape. The design is a coaster (with edges) and an area for the electronics. The model is made of 2 parts that snap together
+               to enclose the circuit. There are cutouts for the button and Arduino plugin. The coaster can fit mugs up to 4 inches and has cutouts in the wall for low sitting mug handles.
+            
+            </p>
+            <h2 class="assigns">Operation</h2>
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/ncOOflBeww8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <p class="white">
+                The coaster works by taking value averages for room temperature and the hot drink, and then beeps when the readings hit a certain level.
+                When the coaster is plugged in, or the button is pressed, it starts callibrating. To do this, it takes thermistor values (before mug is placed) for 10 seconds, averages them, and beeps when it's finished. 
+                Then, the coaster waits 3 minutes for the heat to even out on the mug. It then takes 10 more seconds of readings, averages them, and beeps again. After this, it calculates a goal value of 20% of the way to room temperature value from the starting value. 
+                Then it takes thermistor readings over and over, and when the desired value is reached, will beep. However, if the desired value is never reached, it will beep after 15 minutes and turn off.
+                Once the goal is reached or 15 minutes passes, it "turns off" by doing nothing except checking for a button press. The button can be pressed to callibrate again.
+            </p>
+            
+            
+        </div>
+        
+    </body>
+</html>
